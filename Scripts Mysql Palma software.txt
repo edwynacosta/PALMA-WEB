@@ -1,0 +1,136 @@
+SCRIPTS MYSQL
+
+CREATE TABLE ROL (
+    id_rol INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion_rol VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE CATEGORIA (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_categoria VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE ESTADO_PRODUCTO (
+    id_estado INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_estado VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE TIPO_MOVIMIENTO (
+    id_tipo_mov INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_tipo_movimiento VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE CLIENTES (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_cliente VARCHAR(150) NOT NULL,
+    documento_identidad VARCHAR(20) UNIQUE,
+    telefono VARCHAR(20),
+    email VARCHAR(150),
+    direccion VARCHAR(200),
+    ciudad VARCHAR(100),
+    departamento VARCHAR(100)
+);
+
+CREATE TABLE PROVEEDORES (
+    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_empresa VARCHAR(150) NOT NULL,
+    nit VARCHAR(20) UNIQUE,
+    telefono_principal VARCHAR(20),
+    email VARCHAR(150),
+    direccion VARCHAR(200),
+    ciudad VARCHAR(100)
+);
+
+
+-- Empleados dependen del Rol
+CREATE TABLE EMPLEADOS (
+    id_empleado INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_empleado VARCHAR(150) NOT NULL,
+    id_rol INT,
+    fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
+    monto_pago FLOAT,
+    FOREIGN KEY (id_rol) REFERENCES ROL(id_rol)
+);
+
+-- Login depende de Empleado
+CREATE TABLE LOGIN (
+    id_login INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT,
+    username_log VARCHAR(50) UNIQUE,
+    contrasena_log VARCHAR(255),
+    FOREIGN KEY (id_empleado) REFERENCES EMPLEADOS(id_empleado)
+);
+
+-- Productos dependen de Categoria y Estado
+CREATE TABLE PRODUCTOS (
+    id_producto INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_producto VARCHAR(150) NOT NULL,
+    marca_producto VARCHAR(100),
+    id_categoria INT,
+    id_estado INT,
+    precio_venta_prod FLOAT,
+    FOREIGN KEY (id_categoria) REFERENCES CATEGORIA(id_categoria),
+    FOREIGN KEY (id_estado) REFERENCES ESTADO_PRODUCTO(id_estado)
+);
+
+-- Inventarios vinculan Productos
+CREATE TABLE INVENTARIOS (
+    id_inventario INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT,
+    stock_actual INT,
+    condicion VARCHAR(100),
+    timestamp_ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
+);
+
+
+-- Compras a proveedores[cite: 1]
+CREATE TABLE FACTURA_COMPRA (
+    id_fac_compra INT AUTO_INCREMENT PRIMARY KEY,
+    numero_fac_compra VARCHAR(50),
+    id_proveedor INT,
+    id_empleado INT,
+    fecha_fac_compra DATETIME,
+    valor_fac_compra FLOAT,
+    FOREIGN KEY (id_proveedor) REFERENCES PROVEEDORES(id_proveedor),
+    FOREIGN KEY (id_empleado) REFERENCES EMPLEADOS(id_empleado)
+);
+
+-- Ventas a clientes[cite: 1]
+CREATE TABLE FACTURAS (
+    id_factura INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT,
+    id_cliente INT,
+    fecha_fac DATETIME DEFAULT CURRENT_TIMESTAMP,
+    total_fac FLOAT,
+    FOREIGN KEY (id_empleado) REFERENCES EMPLEADOS(id_empleado),
+    FOREIGN KEY (id_cliente) REFERENCES CLIENTES(id_cliente)
+);
+
+-- Detalles de los productos en facturas y movimientos[cite: 1]
+CREATE TABLE DETALLE_FACTURA (
+    id_detalle INT AUTO_INCREMENT PRIMARY KEY,
+    id_factura INT,
+    id_producto INT,
+    cantidad_detfac INT,
+    precio_unitario_detfac FLOAT,
+    subtotal_detfac FLOAT,
+    FOREIGN KEY (id_factura) REFERENCES FACTURAS(id_factura),
+    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
+);
+
+CREATE TABLE MOVIMIENTOS (
+    id_movimiento INT AUTO_INCREMENT PRIMARY KEY,
+    id_inventario INT,
+    id_tipo_mov INT,
+    id_empleado INT,
+    id_factura INT NULL,
+    id_fac_compra INT NULL,
+    cantidad_movimiento INT,
+    fecha_movimiento DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_inventario) REFERENCES INVENTARIOS(id_inventario),
+    FOREIGN KEY (id_tipo_mov) REFERENCES TIPO_MOVIMIENTO(id_tipo_mov),
+    FOREIGN KEY (id_empleado) REFERENCES EMPLEADOS(id_empleado),
+    FOREIGN KEY (id_factura) REFERENCES FACTURAS(id_factura),
+    FOREIGN KEY (id_fac_compra) REFERENCES FACTURA_COMPRA(id_fac_compra)
+);
