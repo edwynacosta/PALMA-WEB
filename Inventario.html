@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventario de Productos</title>
+
+  <!-- Google Fonts: DM Sans (cuerpo) + Syne (display) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    /* ─── Configuración personalizada de Tailwind ─── */
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#1a7c3e',
+              light: '#25a355',
+              muted: '#e8f5ee',
+              border: '#b6dfc6',
+            },
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          },
+          animation: {
+            fadeIn: 'fadeIn 0.25s ease forwards',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ─── Estilos globales base ─── */
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #f0f4f1; }
+
+    /* ─── Fila seleccionada (clase JS-toggle) ─── */
+    tr.selected {
+      background-color: #e8f5ee !important;
+      outline: 2px solid #1a7c3e;
+      outline-offset: -2px;
+    }
+    tr.selected td { color: #1a7c3e; font-weight: 600; }
+
+    /* ─── Scrollbar personalizada para la tabla ─── */
+    .table-scroll::-webkit-scrollbar { width: 6px; }
+    .table-scroll::-webkit-scrollbar-track { background: #f0f4f1; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #b6dfc6; border-radius: 3px; }
+
+    /* ─── Chips de filtro ─── */
+    .chip { transition: background 0.15s, color 0.15s, border-color 0.15s; cursor: pointer; }
+    .chip.active {
+      background-color: #1a7c3e;
+      color: white;
+      border-color: #1a7c3e;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <!-- ╔══════════════════════════════════════╗ -->
+  <!-- ║           VENTANA PRINCIPAL          ║ -->
+  <!-- ╚══════════════════════════════════════╝ -->
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden border border-brand-border">
+
+    <!-- ── ENCABEZADO ── -->
+    <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+      <h1 class="font-display text-2xl font-extrabold text-brand tracking-tight uppercase">
+        Inventarios
+      </h1>
+
+      <!-- Indicador de selección -->
+      <span id="selectionBadge"
+            class="hidden text-xs font-semibold bg-brand-muted text-brand px-3 py-1 rounded-full border border-brand-border animate-fadeIn">
+        1 producto seleccionado
+      </span>
+    </div>
+
+    <!-- ── BARRA DE BÚSQUEDA ── -->
+    <div class="flex gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+      <!-- Input de texto -->
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Buscar por nombre de producto, proveedor…"
+          class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition"
+          oninput="filterTable()"
+        />
+      </div>
+
+      <!-- Botón buscar -->
+      <button
+        onclick="filterTable()"
+        class="px-5 py-2.5 bg-brand hover:bg-brand-light text-white text-sm font-semibold rounded-xl transition active:scale-95">
+        Buscar
+      </button>
+
+      <!-- Botón limpiar -->
+      <button
+        onclick="clearSearch()"
+        class="px-4 py-2.5 text-gray-400 hover:text-gray-600 text-sm font-semibold rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition active:scale-95">
+        ✕
+      </button>
+    </div>
+
+    <!-- ── CHIPS DE FILTRO ── -->
+    <div class="flex gap-3 px-6 py-3 border-b border-gray-100">
+      <!-- Todos -->
+      <button
+        data-filter="all"
+        onclick="setFilter('all')"
+        class="chip active text-xs font-semibold px-4 py-1.5 rounded-full border border-brand-border bg-brand text-white">
+        Todos
+      </button>
+      <!-- Pocas existencias -->
+      <button
+        data-filter="low"
+        onclick="setFilter('low')"
+        class="chip text-xs font-semibold px-4 py-1.5 rounded-full border border-gray-300 bg-white text-gray-500">
+        Pocas existencias
+      </button>
+      <!-- Más existencias -->
+      <button
+        data-filter="high"
+        onclick="setFilter('high')"
+        class="chip text-xs font-semibold px-4 py-1.5 rounded-full border border-gray-300 bg-white text-gray-500">
+        Más existencias
+      </button>
+      <!-- Entradas recientes -->
+      <button
+        data-filter="recent"
+        onclick="setFilter('recent')"
+        class="chip text-xs font-semibold px-4 py-1.5 rounded-full border border-gray-300 bg-white text-gray-500">
+        Entradas recientes
+      </button>
+    </div>
+
+    <!-- ── TABLA DE INVENTARIO ── -->
+    <div class="table-scroll overflow-y-auto" style="max-height: 360px;">
+      <table class="w-full text-sm">
+
+        <!-- Encabezados de columnas -->
+        <thead class="sticky top-0 bg-white z-10">
+          <tr class="border-b border-gray-100">
+            <!-- Checkbox "seleccionar todos" -->
+            <th class="py-3 px-4 w-8">
+              <input type="checkbox" id="selectAll" onchange="toggleSelectAll()"
+                class="w-4 h-4 rounded border-gray-300 accent-brand cursor-pointer"/>
+            </th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">ID Producto</th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">Nombre</th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">Proveedor</th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">Stock actual</th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">Condición</th>
+            <th class="py-3 px-4 text-left text-xs font-semibold text-brand uppercase tracking-wide">Última actualización</th>
+          </tr>
+        </thead>
+
+        <!-- Cuerpo de la tabla -->
+        <tbody id="tableBody">
+          <!-- Las filas se generan dinámicamente con JavaScript -->
+        </tbody>
+      </table>
+
+      <!-- Mensaje vacío (se muestra cuando no hay resultados) -->
+      <div id="emptyMsg" class="hidden py-16 text-center text-gray-400 text-sm">
+        <svg class="mx-auto mb-3 w-10 h-10 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+        </svg>
+        Sin resultados para esta búsqueda.
+      </div>
+    </div>
+
+    <!-- ── PIE: ACCIONES ── -->
+    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+      <!-- Contador de registros -->
+      <p id="recordCount" class="text-xs text-gray-400 font-medium">
+        Mostrando <span id="shownCount">0</span> de <span id="totalCount">0</span> productos
+      </p>
+
+      <!-- Botones de acción -->
+      <div class="flex gap-3">
+        <!-- Eliminar -->
+        <button
+          id="btnEliminar"
+          onclick="handleDelete()"
+          disabled
+          class="px-5 py-2 rounded-xl text-sm font-semibold border border-gray-300 text-gray-400 bg-white cursor-not-allowed transition
+                 enabled:border-red-300 enabled:text-red-500 enabled:hover:bg-red-50 enabled:cursor-pointer enabled:active:scale-95">
+          Eliminar
+        </button>
+
+        <!-- Modificar -->
+        <button
+          id="btnModificar"
+          onclick="handleEdit()"
+          disabled
+          class="px-5 py-2 rounded-xl text-sm font-semibold border border-gray-300 text-gray-400 bg-white cursor-not-allowed transition
+                 enabled:border-brand enabled:text-brand enabled:hover:bg-brand-muted enabled:cursor-pointer enabled:active:scale-95">
+          Modificar
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /ventana principal -->
+
+
+  <!-- ╔══════════════════════════════════════╗ -->
+  <!-- ║         LÓGICA JAVASCRIPT            ║ -->
+  <!-- ╚══════════════════════════════════════╝ -->
+  <script>
+    /* ─────────────────────────────────────────────
+       1. DATOS DE MUESTRA
+       Cada objeto representa un producto en el
+       inventario. "stock" es número para poder
+       ordenar y filtrar fácilmente.
+    ───────────────────────────────────────────── */
+    const products = [
+      { id: 1001, name: 'Manzanas',    supplier: 'Apple Fruits Inc',    stock: 50,  unit: 'KG',  condition: 'Buena',    updated: '7:36 27/03/2026' },
+      { id: 1002, name: 'Naranjas',    supplier: 'Citrus del Valle',     stock: 120, unit: 'KG',  condition: 'Buena',    updated: '8:10 27/03/2026' },
+      { id: 1003, name: 'Leche entera',supplier: 'Lácteos Sierra',       stock: 8,   unit: 'L',   condition: 'Revisar',  updated: '9:00 27/03/2026' },
+      { id: 1004, name: 'Pan integral',supplier: 'Panadería Central',    stock: 15,  unit: 'Und', condition: 'Buena',    updated: '9:45 27/03/2026' },
+      { id: 1005, name: 'Arroz',       supplier: 'Granos del Sur',       stock: 300, unit: 'KG',  condition: 'Buena',    updated: '10:00 27/03/2026'},
+      { id: 1006, name: 'Fresas',      supplier: 'BerryFarm S.A.',       stock: 5,   unit: 'KG',  condition: 'Urgente',  updated: '10:30 27/03/2026'},
+      { id: 1007, name: 'Yogur',       supplier: 'Lácteos Sierra',       stock: 30,  unit: 'Und', condition: 'Buena',    updated: '11:00 27/03/2026'},
+      { id: 1008, name: 'Papas',       supplier: 'Agrícola Norte',       stock: 200, unit: 'KG',  condition: 'Buena',    updated: '11:15 27/03/2026'},
+      { id: 1009, name: 'Tomates',     supplier: 'Agrícola Norte',       stock: 3,   unit: 'KG',  condition: 'Urgente',  updated: '11:45 27/03/2026'},
+      { id: 1010, name: 'Aceite oliva',supplier: 'Importadora Gourmet',  stock: 40,  unit: 'L',   condition: 'Buena',    updated: '12:00 27/03/2026'},
+    ];
+
+    /* ─────────────────────────────────────────────
+       2. ESTADO DE LA APLICACIÓN
+       Variables que controlan qué se ve y qué
+       está seleccionado en cada momento.
+    ───────────────────────────────────────────── */
+    let selectedIds  = new Set(); // IDs de filas seleccionadas
+    let currentFilter = 'all';    // Filtro activo
+    let searchQuery   = '';       // Texto buscado
+
+    /* ─────────────────────────────────────────────
+       3. FUNCIÓN PRINCIPAL: renderTable()
+       Decide qué filas mostrar aplicando filtros
+       y búsqueda, y las pinta en el DOM.
+    ───────────────────────────────────────────── */
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = ''; // Limpia filas anteriores
+
+      /* 3a. Filtrar por búsqueda de texto */
+      let filtered = products.filter(p => {
+        const q = searchQuery.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(q) ||
+          p.supplier.toLowerCase().includes(q) ||
+          String(p.id).includes(q)
+        );
+      });
+
+      /* 3b. Filtrar por chip activo */
+      if (currentFilter === 'low') {
+        // "Pocas existencias": stock menor o igual a 10
+        filtered = filtered.filter(p => p.stock <= 10);
+      } else if (currentFilter === 'high') {
+        // "Más existencias": ordenar de mayor a menor stock
+        filtered = filtered.sort((a, b) => b.stock - a.stock);
+      } else if (currentFilter === 'recent') {
+        // "Entradas recientes": los últimos 5 por índice
+        filtered = filtered.slice(-5).reverse();
+      }
+
+      /* 3c. Actualizar contador en el pie */
+      document.getElementById('shownCount').textContent = filtered.length;
+      document.getElementById('totalCount').textContent  = products.length;
+
+      /* 3d. Mostrar/ocultar mensaje vacío */
+      document.getElementById('emptyMsg').classList.toggle('hidden', filtered.length > 0);
+
+      /* 3e. Crear y agregar cada fila al tbody */
+      filtered.forEach(p => {
+        const tr = document.createElement('tr');
+
+        /* Clase base: hover y transición de fondo */
+        tr.className = 'border-b border-gray-50 hover:bg-gray-50/70 transition-colors cursor-pointer animate-fadeIn';
+
+        /* Si este producto ya estaba seleccionado, mantenerlo */
+        if (selectedIds.has(p.id)) tr.classList.add('selected');
+
+        /* Elegir color de la condición */
+        const conditionColors = {
+          'Buena':   'bg-green-100 text-green-700',
+          'Revisar': 'bg-yellow-100 text-yellow-700',
+          'Urgente': 'bg-red-100 text-red-600',
+        };
+        const condClass = conditionColors[p.condition] || 'bg-gray-100 text-gray-600';
+
+        /* Construir HTML interno de la fila */
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <input type="checkbox" data-id="${p.id}"
+              class="row-checkbox w-4 h-4 rounded border-gray-300 accent-brand cursor-pointer"
+              ${selectedIds.has(p.id) ? 'checked' : ''}
+              onchange="toggleRow(event, ${p.id})" onclick="event.stopPropagation()"
+            />
+          </td>
+          <td class="py-3 px-4 text-gray-400 font-mono text-xs">${p.id}</td>
+          <td class="py-3 px-4 font-semibold text-gray-700">${p.name}</td>
+          <td class="py-3 px-4 text-gray-500">${p.supplier}</td>
+          <td class="py-3 px-4 font-semibold text-gray-700">${p.stock} ${p.unit}</td>
+          <td class="py-3 px-4">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${condClass}">
+              ${p.condition}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-gray-400 text-xs">${p.updated}</td>
+        `;
+
+        /* Clic en la fila: comportamiento como explorador de archivos */
+        tr.addEventListener('click', () => toggleRowById(p.id));
+
+        tbody.appendChild(tr);
+      });
+
+      updateActionButtons();
+    }
+
+    /* ─────────────────────────────────────────────
+       4. SELECCIÓN DE FILAS
+       Permite seleccionar/deseleccionar filas con
+       clic (como explorador de archivos).
+    ───────────────────────────────────────────── */
+
+    /* Clic en la fila entera */
+    function toggleRowById(id) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      renderTable(); // Redibujar para aplicar estilos
+    }
+
+    /* Clic en el checkbox de la fila (evita doble toggle) */
+    function toggleRow(event, id) {
+      if (event.target.checked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.delete(id);
+      }
+      updateActionButtons();
+      // Re-render sólo para aplicar clase .selected visualmente
+      document.querySelectorAll('tr').forEach(tr => {
+        const cb = tr.querySelector('input[type=checkbox][data-id]');
+        if (cb && parseInt(cb.dataset.id) === id) {
+          tr.classList.toggle('selected', event.target.checked);
+        }
+      });
+    }
+
+    /* Checkbox "seleccionar todos" */
+    function toggleSelectAll() {
+      const cb = document.getElementById('selectAll');
+      const rows = document.querySelectorAll('.row-checkbox');
+      rows.forEach(row => {
+        const id = parseInt(row.dataset.id);
+        if (cb.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        row.checked = cb.checked;
+      });
+      renderTable();
+    }
+
+    /* ─────────────────────────────────────────────
+       5. HABILITAR / DESHABILITAR BOTONES
+       Los botones "Eliminar" y "Modificar" solo
+       se activan cuando hay al menos 1 selección.
+    ───────────────────────────────────────────── */
+    function updateActionButtons() {
+      const hasSelection = selectedIds.size > 0;
+      document.getElementById('btnEliminar').disabled = !hasSelection;
+      document.getElementById('btnModificar').disabled = !hasSelection;
+
+      /* Badge que muestra cuántos productos hay seleccionados */
+      const badge = document.getElementById('selectionBadge');
+      if (hasSelection) {
+        badge.textContent = `${selectedIds.size} producto${selectedIds.size > 1 ? 's' : ''} seleccionado${selectedIds.size > 1 ? 's' : ''}`;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+       6. BÚSQUEDA Y FILTROS
+    ───────────────────────────────────────────── */
+
+    /* Se llama cada vez que el usuario escribe en el input */
+    function filterTable() {
+      searchQuery = document.getElementById('searchInput').value;
+      selectedIds.clear(); // Limpiar selección al buscar
+      renderTable();
+    }
+
+    /* Botón ✕: limpia el input y recarga todo */
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchQuery = '';
+      selectedIds.clear();
+      renderTable();
+    }
+
+    /* Activa un chip de filtro y desactiva los demás */
+    function setFilter(filter) {
+      currentFilter = filter;
+      selectedIds.clear();
+      /* Actualizar estilos de los chips */
+      document.querySelectorAll('.chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderTable();
+    }
+
+    /* ─────────────────────────────────────────────
+       7. ACCIONES: ELIMINAR Y MODIFICAR
+       Por ahora muestran un alert; aquí conectarás
+       tu lógica real (API, modal, etc.).
+    ───────────────────────────────────────────── */
+    function handleDelete() {
+      if (!selectedIds.size) return;
+      const names = [...selectedIds]
+        .map(id => products.find(p => p.id === id)?.name)
+        .join(', ');
+      if (confirm(`¿Eliminar: ${names}?`)) {
+        alert(`✅ Productos eliminados: ${names}\n(Aquí conectas tu API o base de datos)`);
+        selectedIds.clear();
+        renderTable();
+      }
+    }
+
+    function handleEdit() {
+      if (selectedIds.size !== 1) {
+        alert('Selecciona exactamente 1 producto para modificar.');
+        return;
+      }
+      const product = products.find(p => selectedIds.has(p.id));
+      alert(`✏️ Modificar: ${product.name}\nID: ${product.id}\n(Aquí abres tu modal o formulario de edición)`);
+    }
+
+    /* ─────────────────────────────────────────────
+       8. INICIALIZACIÓN
+       Renderiza la tabla al cargar la página.
+    ───────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+
+</body>
+</html>
