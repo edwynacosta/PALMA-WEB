@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PALMA - Caja</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { 
+            sans: ['Montserrat', 'sans-serif'] 
+          },
+          colors: {
+            brand: { 
+                DEFAULT: '#1a7c3e', 
+                light: '#25a355', 
+                muted: '#e8f5ee', 
+                border: '#b6dfc6' 
+            },
+            danger: { DEFAULT: '#d66666', light: '#fee2e2' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Forzamos Montserrat en todo el documento */
+    body { font-family: 'Montserrat', sans-serif; }
+    
+    /* Scrollbar personalizada para la tabla */
+    .table-scroll::-webkit-scrollbar { width: 6px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #b6dfc6; border-radius: 10px; }
+  </style>
+</head>
+
+<body class="h-screen bg-[#f0f4f1] overflow-hidden flex flex-col p-4">
+
+  <div class="bg-white rounded-2xl shadow-xl w-full h-full flex flex-col overflow-hidden border border-brand-border">
+
+    <div class="flex items-center justify-between border-b border-gray-100 bg-white">
+      <div class="flex overflow-x-auto">
+        <button class="px-8 py-5 text-[11px] font-black uppercase text-brand border-b-4 border-brand tracking-widest transition-all">
+            Caja
+        </button>
+        <button class="px-8 py-5 text-[11px] font-bold uppercase text-gray-400 hover:text-brand border-b-4 border-transparent hover:border-brand-border transition-all tracking-widest text-center leading-tight">
+            Factura<br>Electrónica
+        </button>
+        <button class="px-8 py-5 text-[11px] font-bold uppercase text-gray-400 hover:text-brand border-b-4 border-transparent hover:border-brand-border transition-all tracking-widest">
+            Devoluciones
+        </button>
+        <button class="px-8 py-5 text-[11px] font-bold uppercase text-gray-400 hover:text-brand border-b-4 border-transparent hover:border-brand-border transition-all tracking-widest text-center leading-tight">
+            Recibo<br>Proveedores
+        </button>
+      </div>
+      
+      <button class="mr-6 w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-brand font-black hover:bg-red-50 hover:text-danger hover:border-red-200 transition-all active:scale-90">
+        X
+      </button>
+    </div>
+
+    <div class="flex-1 flex overflow-hidden">
+      
+      <div class="w-80 bg-gray-50/50 border-r border-gray-100 p-6 flex flex-col gap-5">
+        
+        <div class="bg-brand text-white p-7 rounded-[25px] shadow-lg">
+          <p class="text-[10px] font-black uppercase opacity-80 mb-1 tracking-wider">Total a pagar:</p>
+          <h2 class="text-5xl font-black tracking-tighter">$123.000</h2>
+        </div>
+
+        <div class="bg-white border-2 border-brand-border p-7 rounded-[25px]">
+          <p class="text-[10px] font-black uppercase text-brand mb-1 tracking-wider">Efectivo:</p>
+          <input type="text" value="$150.000" class="text-4xl font-black text-brand-light w-full outline-none bg-transparent">
+        </div>
+
+        <div class="bg-danger/10 border-2 border-danger/20 p-7 rounded-[25px] mt-auto">
+          <p class="text-[10px] font-black uppercase text-danger mb-1 tracking-wider">Cambio:</p>
+          <h2 class="text-4xl font-black text-danger tracking-tighter">$27.000</h2>
+        </div>
+      </div>
+
+      <div class="flex-1 flex flex-col p-8 overflow-hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-black text-brand uppercase tracking-tighter">Facturación</h1>
+            <div class="text-right">
+                <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest">ID Operación</p>
+                <p class="font-bold text-gray-500">#9928-2026</p>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto table-scroll pr-2">
+            <table class="w-full text-sm">
+              <thead class="text-left text-[11px] font-black text-brand/50 uppercase border-b border-gray-100 sticky top-0 bg-white pb-4">
+                <tr>
+                  <th class="pb-4 tracking-widest">ID</th>
+                  <th class="pb-4 tracking-widest">Nombre del Producto</th>
+                  <th class="pb-4 text-center tracking-widest">Cantidad/Peso</th>
+                  <th class="pb-4 text-right tracking-widest">Precio Unitario</th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-600">
+                <tr class="border-b border-gray-50 hover:bg-brand-muted/40 transition-colors group cursor-pointer">
+                  <td class="py-5 font-mono text-xs text-gray-400">1001</td>
+                  <td class="py-5 font-bold text-gray-700">Manzanas Rojas Importadas</td>
+                  <td class="py-5 text-center font-bold text-brand">2.5 KG</td>
+                  <td class="py-5 text-right font-black text-gray-800">$12.500</td>
+                </tr>
+                <tr class="border-b border-gray-50"><td colspan="4" class="py-5 text-center text-gray-200 italic text-xs">... lista de productos en espera ...</td></tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-8 py-5 border-t border-gray-100 bg-white flex justify-between items-center">
+        <button class="bg-brand text-white px-16 py-4 rounded-[18px] text-lg font-black hover:bg-brand-light hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 uppercase tracking-widest">
+            Cobrar
+        </button>
+
+        <div class="flex gap-4">
+            <button class="px-8 py-4 bg-white border-2 border-brand-border text-brand rounded-[18px] text-xs font-black hover:bg-brand-muted transition-all uppercase tracking-widest">
+                Agregar
+            </button>
+            <button class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-xs font-black hover:bg-red-50 hover:text-danger hover:border-red-100 transition-all uppercase tracking-widest">
+                Eliminar
+            </button>
+            <button class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-xs font-black hover:bg-gray-50 hover:text-brand transition-all uppercase tracking-widest">
+                Modificar
+            </button>
+            <button class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-xs font-black hover:bg-gray-50 hover:text-brand transition-all uppercase tracking-widest">
+                Buscar
+            </button>
+        </div>
+    </div>
+
+  </div>
+</body>
+</html>
