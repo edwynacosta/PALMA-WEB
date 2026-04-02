@@ -6,8 +6,7 @@
     <title>PALMA - CAJERO</title>
     <link rel="icon" type="image/x-icon" href="./logo_palma.ico">
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -19,8 +18,8 @@
                     },
                     colors: {
                         brand: {
-                            vibrant: '#008f39', // Verde del fondo
-                            dark: '#2d571b',    // Verde oscuro de la tarjeta Ventas
+                            vibrant: '#008f39', 
+                            dark: '#1d4316',    
                         }
                     }
                 }
@@ -31,67 +30,85 @@
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         
-        /* Animación suave para las tarjetas */
         .menu-card {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            background-color: white;
+            color: #008f39;
         }
+        
         .menu-card:hover {
-            transform: translateY(-4px);
-            filter: brightness(1.05);
+            transform: translateY(-8px);
+            background-color: #1d4316 !important;
+            color: white !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 
-<body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-12">
+<body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-8 relative">
 
-    <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full gap-6">
-        
-        <div class="menu-card bg-brand-dark rounded-[35px] h-64 flex items-center justify-center shadow-2xl cursor-pointer">
-            <h2 class="text-white text-3xl font-black tracking-[0.2em] uppercase">Ventas</h2>
-        </div>
+    <div class="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full">
+        <div class="grid grid-cols-3 gap-6 w-full h-[70vh]">
+            
+            <div onclick="window.location.href='caja.html'" class="menu-card col-span-3 rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-3xl font-black tracking-[0.2em] uppercase">Ventas</span>
+            </div>
 
-        <div class="grid grid-cols-3 gap-6 h-64">
-            <div class="menu-card bg-white rounded-[35px] flex items-center justify-center shadow-xl cursor-pointer group">
-                <h2 class="text-brand-vibrant text-2xl font-black tracking-[0.1em] uppercase group-hover:scale-110 transition-transform">Finanzas</h2>
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Finanzas</span>
             </div>
-            
-            <div class="menu-card bg-white rounded-[35px] flex items-center justify-center shadow-xl cursor-pointer group">
-                <h2 class="text-brand-vibrant text-2xl font-black tracking-[0.1em] uppercase group-hover:scale-110 transition-transform">Personal</h2>
+
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Personal</span>
             </div>
-            
-            <div class="menu-card bg-white rounded-[35px] flex items-center justify-center shadow-xl cursor-pointer group">
-                <h2 class="text-brand-vibrant text-2xl font-black tracking-[0.1em] uppercase group-hover:scale-110 transition-transform">Inventarios</h2>
+
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Inventarios</span>
             </div>
+
         </div>
     </div>
 
-    <div class="flex justify-between items-center w-full max-w-5xl mx-auto mt-12 px-4">
+    <div class="flex justify-between items-end w-full max-w-7xl mx-auto mt-auto pb-4">
         
-        <div class="flex items-center gap-5">
-            <div class="w-16 h-16 bg-[#e0e0e0] rounded-full"></div>
-            <div class="text-white">
-                <h3 class="text-2xl font-bold leading-tight tracking-tight">Edwin Acosta</h3>
-                <p class="text-sm font-medium opacity-90">Cajero</p>
+        <div class="flex items-center gap-4 text-white">
+            <div class="w-16 h-16 bg-gray-200 rounded-full border-2 border-white/20 shadow-md"></div>
+            <div>
+                <h2 id="userName" class="text-2xl font-black leading-none tracking-tight uppercase">Cargando...</h2>
+                <p class="text-sm font-medium mt-1 tracking-wider">Cajero</p>
             </div>
         </div>
 
         <div class="text-white text-right">
-            <div id="clock" class="text-5xl font-black tracking-tighter">10:12</div>
-            <div class="text-sm font-bold mt-1">Viernes 27 Marzo, 2026</div>
+            <h1 id="clock" class="text-6xl font-black tracking-tighter leading-none">00:00</h1>
+            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide text-white">Cargando fecha...</p>
         </div>
     </div>
 
     <script>
-        // Función para mantener el reloj actualizado
-        function updateClock() {
+        // Obtenemos el nombre del login (ej. Edwin)
+        const nombreUsuario = sessionStorage.getItem('usuarioNombre') || "Edwin Acosta";
+        document.getElementById('userName').textContent = nombreUsuario;
+
+        function updateDateTime() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+            
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hh}:${mm}`;
+
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            let fechaActual = now.toLocaleDateString('es-ES', opciones);
+            document.getElementById('dateLabel').textContent = fechaActual.toUpperCase();
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
     </script>
 </body>
 </html>

@@ -19,8 +19,8 @@
                     },
                     colors: {
                         brand: {
-                            vibrant: '#008f39', // Fondo verde principal
-                            dark: '#1d4316',    // Verde oscuro de la tarjeta Ventas
+                            vibrant: '#008f39', // Verde principal
+                            dark: '#1d4316',    // Verde oscuro para el hover
                         }
                     }
                 }
@@ -32,13 +32,17 @@
         body { font-family: 'Montserrat', sans-serif; }
         
         .menu-card {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.3s ease-in-out;
             cursor: pointer;
+            background-color: white;
+            color: #008f39;
         }
         
         .menu-card:hover {
-            transform: translateY(-5px);
-            filter: brightness(1.05);
+            transform: translateY(-8px);
+            background-color: #1d4316 !important;
+            color: white !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
         }
 
         .menu-card:active {
@@ -50,7 +54,7 @@
 <body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-8 relative">
 
     <div id="menuContainer" class="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full">
-        </div>
+    </div>
 
     <div class="flex justify-between items-end w-full max-w-7xl mx-auto mt-auto pb-4">
         
@@ -63,41 +67,40 @@
         </div>
 
         <div class="text-white text-right">
-            <h1 id="clock" class="text-5xl font-black tracking-tighter leading-none">10:12</h1>
-            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide">Viernes 27 Marzo, 2026</p>
+            <h1 id="clock" class="text-6xl font-black tracking-tighter leading-none">00:00</h1>
+            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide">Cargando fecha...</p>
         </div>
     </div>
 
     <div class="absolute top-4 right-4 opacity-20 hover:opacity-100 transition-opacity">
-        <button onclick="renderMenu('admin')" class="bg-white text-xs p-2 rounded-l-md font-bold">Ver Admin</button>
-        <button onclick="renderMenu('cajero')" class="bg-white text-xs p-2 rounded-r-md font-bold border-l">Ver Cajero</button>
+        <button onclick="renderMenu('admin')" class="bg-white text-xs p-2 rounded-l-md font-bold text-brand-vibrant">Ver Admin</button>
+        <button onclick="renderMenu('cajero')" class="bg-white text-xs p-2 rounded-r-md font-bold border-l text-brand-vibrant">Ver Cajero</button>
     </div>
 
     <script>
         const menuContainer = document.getElementById('menuContainer');
-        
+        const nombreFijo = sessionStorage.getItem('usuarioNombre') || "Nicolás Herrán";
+
         const views = {
             admin: {
-                name: "Nicolás Herrán",
                 role: "Administrador",
                 layout: "grid-cols-3",
                 items: [
-                    { label: "VENTAS", style: "bg-brand-dark text-white", span: "" },
-                    { label: "INVENTARIOS", style: "bg-white text-brand-vibrant", span: "" },
-                    { label: "CUENTA", style: "bg-white text-brand-vibrant", span: "row-span-2" },
-                    { label: "FINANZAS", style: "bg-white text-brand-vibrant", span: "" },
-                    { label: "PERSONAL", style: "bg-white text-brand-vibrant", span: "" }
+                    { label: "VENTAS", span: "" },
+                    { label: "INVENTARIOS", span: "" },
+                    { label: "CUENTA", span: "row-span-2" },
+                    { label: "FINANZAS", span: "" },
+                    { label: "PERSONAL", span: "" }
                 ]
             },
             cajero: {
-                name: "Edwin Acosta",
                 role: "Cajero",
                 layout: "grid-cols-3",
                 items: [
-                    { label: "VENTAS", style: "bg-brand-dark text-white", span: "col-span-3" },
-                    { label: "FINANZAS", style: "bg-white text-brand-vibrant", span: "" },
-                    { label: "PERSONAL", style: "bg-white text-brand-vibrant", span: "" },
-                    { label: "INVENTARIOS", style: "bg-white text-brand-vibrant", span: "" }
+                    { label: "VENTAS", span: "col-span-3" },
+                    { label: "FINANZAS", span: "" },
+                    { label: "PERSONAL", span: "" },
+                    { label: "INVENTARIOS", span: "" }
                 ]
             }
         };
@@ -105,34 +108,41 @@
         function renderMenu(roleKey) {
             const config = views[roleKey];
             
-            // Actualizar textos
-            document.getElementById('userName').textContent = config.name;
+            document.getElementById('userName').textContent = nombreFijo;
             document.getElementById('userRole').textContent = config.role;
             
-            // Generar Grid
             menuContainer.innerHTML = `
                 <div class="grid ${config.layout} gap-6 w-full h-[70vh]">
-                    ${config.items.map(item => `
-                        <div class="menu-card ${item.style} ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
-                            <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
-                        </div>
-                    `).join('')}
+                    ${config.items.map(item => {
+                        // CONEXIÓN A CAJA: Si es ventas, agrega la redirección al hacer clic
+                        const action = item.label === 'VENTAS' ? "window.location.href='caja.html'" : "";
+                        
+                        return `
+                            <div onclick="${action}" class="menu-card ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
+                                <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             `;
         }
 
-        // Reloj en tiempo real
-        function updateClock() {
+        function updateDateTime() {
             const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                            now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').textContent = timeStr;
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hh}:${mm}`;
+
+            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            const fechaStr = `${dias[now.getDay()]} ${now.getDate()} ${meses[now.getMonth()]}, ${now.getFullYear()}`;
+            document.getElementById('dateLabel').textContent = fechaStr.toUpperCase();
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
 
-        // Carga inicial (Admin por defecto)
         renderMenu('admin');
     </script>
 </body>
