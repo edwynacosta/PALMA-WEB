@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - LOGIN</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            vibrant: '#008f39', 
+                            input: '#daead6',   
+                            button: '#1a7c3e',  
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-brand-vibrant h-screen w-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-[40px] shadow-2xl w-full max-w-[420px] p-12 flex flex-col items-center border border-gray-100">
+        
+        <div class="mb-4 w-24 h-24 flex items-center justify-center">
+            <img 
+                src="./logo_palma.png" 
+                alt="Logo Palma" 
+                class="max-w-full max-h-full object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-[10px] text-red-500 font-bold text-center\'>ERROR:<br>logo_palma.png<br>no encontrado</span>';"
+            >
+        </div>
+
+        <h1 class="text-brand-vibrant text-4xl font-black tracking-[0.2em] mb-12 uppercase text-center">
+            Palma
+        </h1>
+
+        <form class="w-full space-y-5">
+            <div class="w-full">
+                <input type="text" placeholder="Usuario" class="w-full bg-brand-input border-none rounded-2xl py-4 px-6 text-brand-vibrant placeholder-brand-vibrant/50 font-bold text-sm focus:ring-2 focus:ring-brand-button outline-none transition-all">
+            </div>
+
+            <div class="w-full">
+                <input type="password" placeholder="Contraseña" class="w-full bg-brand-input border-none rounded-2xl py-4 px-6 text-brand-vibrant placeholder-brand-vibrant/50 font-bold text-sm focus:ring-2 focus:ring-brand-button outline-none transition-all">
+            </div>
+
+            <div class="flex items-center justify-between pt-6 gap-4">
+                <button type="submit" class="bg-brand-button text-white font-black px-10 py-3.5 rounded-2xl text-base tracking-widest hover:bg-green-800 transition-all uppercase active:scale-95 shadow-md shadow-brand-button/20">
+                    Entrar
+                </button>
+
+                <div class="text-right flex flex-col gap-0.5">
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">¿Olvidaste el usuario?</a>
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">¿Olvidaste la contraseña?</a>
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">Ayuda</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

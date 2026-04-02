@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - ADMINISTRADOR</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            vibrant: '#008f39', // Fondo verde principal
+                            dark: '#1d4316',    // Verde oscuro de la tarjeta Ventas
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        
+        .menu-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            filter: brightness(1.05);
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-8 relative">
+
+    <div id="menuContainer" class="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full">
+        </div>
+
+    <div class="flex justify-between items-end w-full max-w-7xl mx-auto mt-auto pb-4">
+        
+        <div class="flex items-center gap-4 text-white">
+            <div id="userAvatar" class="w-16 h-16 bg-gray-200 rounded-full border-2 border-white/20"></div>
+            <div>
+                <h2 id="userName" class="text-2xl font-black leading-none tracking-tight">Cargando...</h2>
+                <p id="userRole" class="text-sm font-medium opacity-90 mt-1">Cargando...</p>
+            </div>
+        </div>
+
+        <div class="text-white text-right">
+            <h1 id="clock" class="text-5xl font-black tracking-tighter leading-none">10:12</h1>
+            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide">Viernes 27 Marzo, 2026</p>
+        </div>
+    </div>
+
+    <div class="absolute top-4 right-4 opacity-20 hover:opacity-100 transition-opacity">
+        <button onclick="renderMenu('admin')" class="bg-white text-xs p-2 rounded-l-md font-bold">Ver Admin</button>
+        <button onclick="renderMenu('cajero')" class="bg-white text-xs p-2 rounded-r-md font-bold border-l">Ver Cajero</button>
+    </div>
+
+    <script>
+        const menuContainer = document.getElementById('menuContainer');
+        
+        const views = {
+            admin: {
+                name: "Nicolás Herrán",
+                role: "Administrador",
+                layout: "grid-cols-3",
+                items: [
+                    { label: "VENTAS", style: "bg-brand-dark text-white", span: "" },
+                    { label: "INVENTARIOS", style: "bg-white text-brand-vibrant", span: "" },
+                    { label: "CUENTA", style: "bg-white text-brand-vibrant", span: "row-span-2" },
+                    { label: "FINANZAS", style: "bg-white text-brand-vibrant", span: "" },
+                    { label: "PERSONAL", style: "bg-white text-brand-vibrant", span: "" }
+                ]
+            },
+            cajero: {
+                name: "Edwin Acosta",
+                role: "Cajero",
+                layout: "grid-cols-3",
+                items: [
+                    { label: "VENTAS", style: "bg-brand-dark text-white", span: "col-span-3" },
+                    { label: "FINANZAS", style: "bg-white text-brand-vibrant", span: "" },
+                    { label: "PERSONAL", style: "bg-white text-brand-vibrant", span: "" },
+                    { label: "INVENTARIOS", style: "bg-white text-brand-vibrant", span: "" }
+                ]
+            }
+        };
+
+        function renderMenu(roleKey) {
+            const config = views[roleKey];
+            
+            // Actualizar textos
+            document.getElementById('userName').textContent = config.name;
+            document.getElementById('userRole').textContent = config.role;
+            
+            // Generar Grid
+            menuContainer.innerHTML = `
+                <div class="grid ${config.layout} gap-6 w-full h-[70vh]">
+                    ${config.items.map(item => `
+                        <div class="menu-card ${item.style} ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
+                            <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Reloj en tiempo real
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = timeStr;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Carga inicial (Admin por defecto)
+        renderMenu('admin');
+    </script>
+</body>
+</html>
