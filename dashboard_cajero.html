@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - CAJERO</title>
+    <link rel="icon" type="image/x-icon" href="./logo_palma.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            vibrant: '#008f39', 
+                            dark: '#1d4316',    
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        
+        .menu-card {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            background-color: white;
+            color: #008f39;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-8px);
+            background-color: #1d4316 !important;
+            color: white !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-8 relative">
+
+    <div class="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full">
+        <div class="grid grid-cols-3 gap-6 w-full h-[70vh]">
+            
+            <div onclick="window.location.href='caja.html'" class="menu-card col-span-3 rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-3xl font-black tracking-[0.2em] uppercase">Ventas</span>
+            </div>
+
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Finanzas</span>
+            </div>
+
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Personal</span>
+            </div>
+
+            <div class="menu-card rounded-[40px] flex items-center justify-center shadow-2xl text-center">
+                <span class="text-xl font-black tracking-widest uppercase">Inventarios</span>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="flex justify-between items-end w-full max-w-7xl mx-auto mt-auto pb-4">
+        
+        <div class="flex items-center gap-4 text-white">
+            <div class="w-16 h-16 bg-gray-200 rounded-full border-2 border-white/20 shadow-md"></div>
+            <div>
+                <h2 id="userName" class="text-2xl font-black leading-none tracking-tight uppercase">Cargando...</h2>
+                <p class="text-sm font-medium mt-1 tracking-wider">Cajero</p>
+            </div>
+        </div>
+
+        <div class="text-white text-right">
+            <h1 id="clock" class="text-6xl font-black tracking-tighter leading-none">00:00</h1>
+            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide text-white">Cargando fecha...</p>
+        </div>
+    </div>
+
+    <script>
+        // Obtenemos el nombre del login (ej. Edwin)
+        const nombreUsuario = sessionStorage.getItem('usuarioNombre') || "Edwin Acosta";
+        document.getElementById('userName').textContent = nombreUsuario;
+
+        function updateDateTime() {
+            const now = new Date();
+            
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hh}:${mm}`;
+
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            let fechaActual = now.toLocaleDateString('es-ES', opciones);
+            document.getElementById('dateLabel').textContent = fechaActual.toUpperCase();
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+    </script>
+</body>
+</html>

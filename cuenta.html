@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PALMA - CUENTA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+          colors: {
+            brand: { DEFAULT: '#1a7c3e', light: '#25a355', muted: '#e8f5ee', border: '#b6dfc6' },
+            danger: { DEFAULT: '#d66666', light: '#fee2e2' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Montserrat', sans-serif; }
+    .table-scroll::-webkit-scrollbar { width: 6px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #b6dfc6; border-radius: 10px; }
+    
+    .dropdown-content { display: none; animation: slideDown 0.2s ease-out; }
+    .dropdown-content.active { display: block; }
+
+    .modal-overlay { 
+        display: none; 
+        position: fixed; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.4); 
+        backdrop-filter: blur(4px);
+        z-index: 100;
+        align-items: center; 
+        justify-content: center; 
+    }
+    .modal-overlay.active { display: flex; }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body class="h-screen bg-[#f0f4f1] overflow-hidden flex flex-col p-4 text-gray-800">
+
+  <div id="modalFunciones" class="modal-overlay">
+      <div class="bg-white w-[500px] rounded-[30px] shadow-2xl border border-brand-border overflow-hidden">
+          <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 id="modalTitle" class="font-black text-brand uppercase tracking-widest text-sm">Título</h2>
+              <button onclick="cerrarModal()" class="text-gray-400 hover:text-danger font-black">X</button>
+          </div>
+          <div id="modalBody" class="p-8 flex flex-col gap-4 overflow-y-auto max-h-[70vh]">
+              </div>
+          <div class="p-6 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-3" id="modalFooter">
+              </div>
+      </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-xl w-full h-full flex flex-col overflow-hidden border border-brand-border">
+
+    <div class="flex items-center justify-between border-b border-gray-100 bg-white px-8 py-5">
+      <h1 class="text-xs font-black uppercase text-brand tracking-[0.2em]">Configuración de Cuenta</h1>
+      <button onclick="window.history.back()" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-brand font-black hover:bg-red-50 hover:text-danger hover:border-red-200 transition-all active:scale-90">
+        X
+      </button>
+    </div>
+
+    <div class="flex-1 flex overflow-hidden">
+      
+      <div class="w-80 bg-gray-50/50 border-r border-gray-100 p-6 flex flex-col gap-4">
+        <div class="bg-white border-2 border-brand-border p-6 rounded-[25px] flex items-center gap-4 shadow-sm">
+          <div class="w-12 h-12 bg-brand rounded-full flex items-center justify-center text-white font-black text-xl">A</div>
+          <div>
+            <p class="text-[9px] font-black uppercase text-brand opacity-60 tracking-widest leading-none">Administrador de Cuenta</p>
+            <h3 class="font-black text-gray-800 text-sm leading-tight mt-1">Nicolas Herran</h3>
+          </div>
+        </div>
+
+        <div class="bg-brand text-white p-7 rounded-[25px] shadow-lg flex flex-col gap-3">
+          <p class="text-[10px] font-black uppercase opacity-80 tracking-wider">Estado del Software:</p>
+          <h2 class="text-3xl font-black tracking-tighter uppercase italic">Versión Gratuita</h2>
+          <button class="mt-2 py-3 bg-white text-brand text-[10px] font-black rounded-xl uppercase hover:bg-brand-muted transition-all">
+              Adquirir Versión Full
+          </button>
+        </div>
+
+        <button onclick="window.location.href='mailto:soporte@palma.com'" class="bg-brand-muted border-2 border-brand-border p-6 rounded-[25px] mt-auto hover:bg-white transition-all text-left group">
+          <p class="text-[9px] font-black uppercase text-brand mb-1 tracking-wider">Asistencia:</p>
+          <h2 class="text-xl font-black text-brand tracking-tighter">SERVICIO TÉCNICO</h2>
+          <p class="text-[10px] text-brand/60 font-medium mt-1 uppercase font-bold tracking-tighter italic">Click para contactar</p>
+        </button>
+      </div>
+
+      <div class="flex-1 flex flex-col p-8 overflow-hidden relative">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-black text-brand uppercase tracking-tighter">Gestión de Usuarios</h1>
+            
+            <div class="flex bg-gray-100 p-1 rounded-xl gap-1 items-center relative">
+                <button onclick="mostrarTodos()" id="btnTodos" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg bg-white shadow-sm text-brand transition-all">Todos</button>
+                <button onclick="ordenarAccesos()" id="btnAccesos" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg text-gray-400 hover:text-brand transition-all">Últimos Accesos</button>
+                
+                <div class="relative">
+                    <button onclick="toggleDropdown()" id="btnRol" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg text-gray-400 hover:text-brand transition-all flex items-center gap-2">
+                        Por Rol
+                        <svg id="arrowIcon" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div id="dropdownRol" class="dropdown-content absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4">
+                        <div class="flex flex-col gap-3">
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" id="fAdmin" checked onchange="aplicarFiltros()" class="w-4 h-4 accent-brand rounded">
+                                <span class="text-[10px] font-bold text-gray-500 group-hover:text-brand uppercase">Administrador</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" id="fCajero" checked onchange="aplicarFiltros()" class="w-4 h-4 accent-brand rounded">
+                                <span class="text-[10px] font-bold text-gray-500 group-hover:text-brand uppercase">Cajero</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto table-scroll pr-2">
+            <table class="w-full text-sm">
+              <thead class="text-left text-[11px] font-black text-brand/50 uppercase border-b border-gray-100 sticky top-0 bg-white pb-4">
+                <tr>
+                  <th class="pb-4 tracking-widest">Nombre Completo</th>
+                  <th class="pb-4 text-center tracking-widest">Rol de Usuario</th>
+                  <th class="pb-4 text-right tracking-widest">Último Acceso</th>
+                </tr>
+              </thead>
+              <tbody id="tablaUsuarios" class="text-gray-600 font-bold">
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-8 py-5 border-t border-gray-100 bg-white flex justify-between items-center">
+        <button onclick="modalNuevoUsuario()" class="bg-brand text-white px-12 py-4 rounded-[18px] text-lg font-black hover:bg-brand-light hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 uppercase tracking-widest">
+            Nuevo Usuario
+        </button>
+
+        <div class="flex gap-4">
+            <button onclick="modalCambiarPass()" class="px-8 py-4 bg-white border-2 border-brand-border text-brand rounded-[18px] text-[10px] font-black hover:bg-brand-muted transition-all uppercase tracking-widest">Cambiar Contraseña</button>
+            <button onclick="modalEliminarUsuario()" class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-[10px] font-black hover:bg-red-50 transition-all uppercase tracking-widest">Eliminar Usuario</button>
+            <button onclick="modalModificarUsuario()" class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-[10px] font-black hover:bg-gray-50 transition-all uppercase tracking-widest">Modificar Usuario</button>
+            <button onclick="modalBuscarUsuario()" class="px-8 py-4 bg-white border-2 border-gray-100 text-gray-400 rounded-[18px] text-[10px] font-black hover:bg-gray-50 hover:text-brand transition-all uppercase tracking-widest">Buscar</button>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const usuarios = [
+        { nombre: "Nicolas Herran", rol: "Administrador", acceso: "2026-04-03 08:30", f: "Hoy, 08:30 AM", ini: "EA", tel: "3001234567", mail: "edwin@palma.com" },
+        { nombre: "Edwin Acosta", rol: "Cajero", acceso: "2026-04-02 17:45", f: "Ayer, 05:45 PM", ini: "MP", tel: "3109876543", mail: "maria@palma.com" },
+        { nombre: "Alejandro Hernandez", rol: "Cajero", acceso: "2026-04-01 09:15", f: "01 Abr, 09:15 AM", ini: "CF", tel: "3205554433", mail: "carlos@palma.com" }
+    ];
+
+    function render(data) {
+        const tbody = document.getElementById('tablaUsuarios');
+        tbody.innerHTML = data.map(u => `
+            <tr class="border-b border-gray-50 hover:bg-brand-muted/40 transition-colors">
+                <td class="py-5 font-bold text-gray-700 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full ${u.rol === 'Administrador' ? 'bg-brand-border text-brand' : 'bg-gray-100 text-gray-400'} flex items-center justify-center text-[10px] font-black">${u.ini}</div>
+                    ${u.nombre}
+                </td>
+                <td class="py-5 text-center">
+                    <span class="px-3 py-1 ${u.rol === 'Administrador' ? 'bg-brand/10 text-brand' : 'bg-gray-100 text-gray-500'} rounded-full text-[9px] font-black uppercase">${u.rol}</span>
+                </td>
+                <td class="py-5 text-right font-bold text-gray-400 italic text-xs">${u.f}</td>
+            </tr>
+        `).join('');
+    }
+
+    /* --- LÓGICA DE MODALES --- */
+    function abrirModal(titulo, contenido, botones) {
+        document.getElementById('modalTitle').innerText = titulo;
+        document.getElementById('modalBody').innerHTML = contenido;
+        document.getElementById('modalFooter').innerHTML = botones;
+        document.getElementById('modalFunciones').classList.add('active');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalFunciones').classList.remove('active');
+    }
+
+    // 0. NUEVO USUARIO (AÑADIDO)
+    function modalNuevoUsuario() {
+        const content = `
+            <div class="flex flex-col gap-3">
+                <label class="text-[10px] font-black text-brand uppercase">Nombre Completo</label>
+                <input type="text" id="newNombre" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="Ej: Juan Perez">
+                
+                <label class="text-[10px] font-black text-brand uppercase">Rol del Usuario</label>
+                <select id="newRol" class="p-3 rounded-xl border-2 border-brand-border bg-white text-xs font-bold outline-none">
+                    <option value="Cajero">Cajero</option>
+                    <option value="Administrador">Administrador</option>
+                </select>
+
+                <label class="text-[10px] font-black text-brand uppercase">Contraseña</label>
+                <input type="password" id="newPass" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="••••••••">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black text-brand uppercase">Teléfono</label>
+                        <input type="tel" id="newTel" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="300...">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black text-brand uppercase">Correo Electrónico</label>
+                        <input type="email" id="newMail" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="usuario@palma.com">
+                    </div>
+                </div>
+            </div>
+        `;
+        const buttons = `
+            <button onclick="cerrarModal()" class="px-6 py-2 text-[10px] font-black text-gray-400 uppercase">Cancelar</button>
+            <button onclick="confirmarAccion('Usuario creado exitosamente')" class="px-8 py-3 bg-brand text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-brand/20">Registrar Usuario</button>
+        `;
+        abrirModal("Registro de Nuevo Usuario", content, buttons);
+    }
+
+    // 1. CAMBIAR CONTRASEÑA
+    function modalCambiarPass() {
+        const options = usuarios.map(u => `<option value="${u.nombre}">${u.nombre}</option>`).join('');
+        const content = `
+            <label class="text-[10px] font-black text-brand uppercase">Seleccionar Usuario</label>
+            <select id="selUserPass" class="p-3 rounded-xl border-2 border-brand-border bg-white text-xs font-bold outline-none">${options}</select>
+            <label class="text-[10px] font-black text-brand uppercase">Contraseña Anterior</label>
+            <input type="password" id="oldPass" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="••••••••">
+            <label class="text-[10px] font-black text-brand uppercase">Nueva Contraseña</label>
+            <input type="password" id="newPassUpdate" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="••••••••">
+        `;
+        const buttons = `
+            <button onclick="cerrarModal()" class="px-6 py-2 text-[10px] font-black text-gray-400 uppercase">Cancelar</button>
+            <button onclick="confirmarAccion('Contraseña actualizada con éxito')" class="px-8 py-3 bg-brand text-white text-[10px] font-black rounded-xl uppercase">Actualizar</button>
+        `;
+        abrirModal("Cambiar Contraseña", content, buttons);
+    }
+
+    // 2. ELIMINAR USUARIO
+    function modalEliminarUsuario() {
+        const checks = usuarios.map(u => `
+            <label class="flex items-center gap-3 p-2 hover:bg-red-50 rounded-xl cursor-pointer">
+                <input type="checkbox" name="delUser" value="${u.nombre}" class="accent-danger">
+                <span class="text-xs font-bold">${u.nombre} (${u.rol})</span>
+            </label>
+        `).join('');
+        const content = `
+            <p class="text-xs font-bold text-gray-500 mb-2">Seleccione los usuarios que desea remover del sistema:</p>
+            <div class="max-h-40 overflow-y-auto flex flex-col gap-1">${checks}</div>
+        `;
+        const buttons = `
+            <button onclick="cerrarModal()" class="px-6 py-2 text-[10px] font-black text-gray-400 uppercase">Cancelar</button>
+            <button onclick="confirmarBorrado()" class="px-8 py-3 bg-danger text-white text-[10px] font-black rounded-xl uppercase">Eliminar Selección</button>
+        `;
+        abrirModal("Eliminar Usuarios", content, buttons);
+    }
+
+    function confirmarBorrado() {
+        if(confirm("¿Está seguro de eliminar los usuarios seleccionados? Esta acción es irreversible.")) {
+            cerrarModal();
+            alert("Usuarios eliminados del sistema.");
+        }
+    }
+
+    // 3. MODIFICAR USUARIO
+    function modalModificarUsuario() {
+        const content = `
+            <label class="text-[10px] font-black text-brand uppercase">Buscar Usuario a Modificar</label>
+            <input type="text" id="modSearch" onkeyup="buscarParaModificar()" class="p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="Escriba nombre...">
+            <div id="modResult" class="mt-4 hidden p-4 bg-brand-muted rounded-2xl flex flex-col gap-3 border border-brand-border">
+                <p class="text-[9px] font-black text-brand uppercase">Campos editables:</p>
+                <input type="text" id="editNombre" class="p-2 rounded-lg border border-brand-border text-xs font-bold" value="">
+                <select id="editRol" class="p-2 rounded-lg border border-brand-border text-xs font-bold">
+                    <option value="Administrador">Administrador</option>
+                    <option value="Cajero">Cajero</option>
+                </select>
+                <input type="tel" id="editTel" class="p-2 rounded-lg border border-brand-border text-xs font-bold" value="">
+                <input type="email" id="editMail" class="p-2 rounded-lg border border-brand-border text-xs font-bold" value="">
+            </div>
+        `;
+        const buttons = `
+            <button onclick="cerrarModal()" class="px-6 py-2 text-[10px] font-black text-gray-400 uppercase">Cancelar</button>
+            <button id="btnSaveMod" class="hidden px-8 py-3 bg-brand text-white text-[10px] font-black rounded-xl uppercase" onclick="confirmarAccion('Cambios guardados con éxito')">Guardar Cambios</button>
+        `;
+        abrirModal("Modificar Usuario", content, buttons);
+    }
+
+    function buscarParaModificar() {
+        const val = document.getElementById('modSearch').value.toLowerCase();
+        const res = usuarios.find(u => u.nombre.toLowerCase().includes(val));
+        const div = document.getElementById('modResult');
+        const btn = document.getElementById('btnSaveMod');
+        if(val.length > 2 && res) {
+            div.classList.remove('hidden');
+            btn.classList.remove('hidden');
+            document.getElementById('editNombre').value = res.nombre;
+            document.getElementById('editRol').value = res.rol;
+            document.getElementById('editTel').value = res.tel || "";
+            document.getElementById('editMail').value = res.mail || "";
+        } else {
+            div.classList.add('hidden');
+            btn.classList.add('hidden');
+        }
+    }
+
+    // 4. BUSCAR USUARIO
+    function modalBuscarUsuario() {
+        const content = `
+            <div class="flex gap-2">
+                <input type="text" id="findInput" class="flex-1 p-3 rounded-xl border-2 border-brand-border text-xs font-bold outline-none" placeholder="Nombre del usuario...">
+                <button onclick="ejecutarBusqueda()" class="p-3 bg-brand text-white rounded-xl"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></button>
+            </div>
+            <div id="findResult" class="mt-4"></div>
+        `;
+        abrirModal("Buscador Palma", content, `<button onclick="cerrarModal()" class="px-8 py-3 bg-brand text-white text-[10px] font-black rounded-xl uppercase tracking-widest">Cerrar</button>`);
+    }
+
+    function ejecutarBusqueda() {
+        const val = document.getElementById('findInput').value.toLowerCase();
+        const u = usuarios.find(user => user.nombre.toLowerCase().includes(val));
+        const resDiv = document.getElementById('findResult');
+        if(u) {
+            resDiv.innerHTML = `
+                <div class="bg-white border-2 border-brand-border p-5 rounded-[20px] shadow-sm flex flex-col gap-2">
+                    <h4 class="text-brand font-black text-lg">${u.nombre}</h4>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${u.rol}</p>
+                    <hr class="my-2 border-gray-100">
+                    <div class="flex flex-col gap-1 text-[10px] font-black uppercase text-brand/60">
+                        <div class="flex justify-between"><span>Teléfono:</span> <span class="text-gray-700">${u.tel || 'N/A'}</span></div>
+                        <div class="flex justify-between"><span>Correo:</span> <span class="text-gray-700">${u.mail || 'N/A'}</span></div>
+                        <div class="flex justify-between"><span>Último Acceso:</span> <span class="text-gray-700">${u.f}</span></div>
+                    </div>
+                </div>
+            `;
+        } else {
+            resDiv.innerHTML = `<p class="text-center text-xs font-bold text-danger italic">No se encontró ningún usuario.</p>`;
+        }
+    }
+
+    function confirmarAccion(msg) {
+        if(confirm("¿Estás seguro de realizar esta acción?")) {
+            alert(msg);
+            cerrarModal();
+        }
+    }
+
+    function toggleDropdown() {
+        const dd = document.getElementById('dropdownRol');
+        const arrow = document.getElementById('arrowIcon');
+        dd.classList.toggle('active');
+        arrow.style.transform = dd.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function aplicarFiltros() {
+        const adminOn = document.getElementById('fAdmin').checked;
+        const cajeroOn = document.getElementById('fCajero').checked;
+        const filtrados = usuarios.filter(u => (u.rol === 'Administrador' && adminOn) || (u.rol === 'Cajero' && cajeroOn));
+        render(filtrados);
+    }
+
+    function mostrarTodos() {
+        document.getElementById('fAdmin').checked = true;
+        document.getElementById('fCajero').checked = true;
+        render(usuarios);
+    }
+
+    function ordenarAccesos() {
+        const sorted = [...usuarios].sort((a, b) => new Date(b.acceso) - new Date(a.acceso));
+        render(sorted);
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.closest('#btnRol') && !event.target.closest('#dropdownRol')) {
+            const dropdown = document.getElementById('dropdownRol');
+            if (dropdown) {
+                dropdown.classList.remove('active');
+                document.getElementById('arrowIcon').style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+    mostrarTodos();
+  </script>
+</body>
+</html>

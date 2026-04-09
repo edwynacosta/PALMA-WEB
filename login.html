@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - LOGIN</title>
+    
+    <link rel="icon" type="image/x-icon" href="./logo_palma.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            vibrant: '#008f39', // Verde del fondo
+                            input: '#daead6',   // Fondo de los campos
+                            button: '#1a7c3e',  // Verde oscuro del botón
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-brand-vibrant h-screen w-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-[40px] shadow-2xl w-full max-w-[420px] p-12 flex flex-col items-center border border-gray-100">
+        
+        <div class="mb-4 w-40 h-40 flex items-center justify-center">
+            <img 
+                src="./logo_palma.png" 
+                alt="Logo Palma" 
+                class="max-w-full max-h-full object-contain"
+                onerror="this.style.display='none';"
+            >
+        </div>
+
+        <h1 class="text-brand-vibrant text-4xl font-black tracking-[0.1em] mb-12 uppercase text-center">
+            Palma
+        </h1>
+
+        <form id="loginForm" class="w-full space-y-5">
+            <div class="w-full">
+                <input 
+                    id="username" 
+                    type="text" 
+                    placeholder="Usuario" 
+                    class="w-full bg-brand-input border-none rounded-2xl py-4 px-6 text-brand-vibrant placeholder-brand-vibrant/50 font-bold text-sm focus:ring-2 focus:ring-brand-button outline-none transition-all" 
+                    required
+                >
+            </div>
+
+            <div class="w-full">
+                <input 
+                    id="password" 
+                    type="password" 
+                    placeholder="Contraseña" 
+                    class="w-full bg-brand-input border-none rounded-2xl py-4 px-6 text-brand-vibrant placeholder-brand-vibrant/50 font-bold text-sm focus:ring-2 focus:ring-brand-button outline-none transition-all" 
+                    required
+                >
+            </div>
+
+            <div class="flex items-center justify-between pt-6 gap-4">
+                <button 
+                    type="submit" 
+                    class="bg-brand-button text-white font-black px-10 py-3.5 rounded-2xl text-base tracking-widest hover:bg-green-800 transition-all uppercase active:scale-95 shadow-md shadow-brand-button/20"
+                >
+                    Entrar
+                </button>
+
+                <div class="text-right flex flex-col gap-0.5">
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">¿Olvidaste el usuario?</a>
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">¿Olvidaste la contraseña?</a>
+                    <a href="#" class="text-brand-vibrant text-[10px] font-bold hover:underline leading-tight">Ayuda</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const userInput = document.getElementById('username').value.toLowerCase().trim();
+            const passInput = document.getElementById('password').value;
+
+            // Base de datos local con roles y destinos
+            const usuarios = {
+                "nicolas": { 
+                    pass: "admin123", 
+                    nombre: "Nicolas Herran", 
+                    rol: "admin", 
+                    destino: "dashboard_admin.html" 
+                },
+                "edwin": { 
+                    pass: "cajero01", 
+                    nombre: "Edwin Acosta", 
+                    rol: "cajero", 
+                    destino: "dashboard_cajero.html" 
+                },
+                "alejandro": { 
+                    pass: "cajero02", 
+                    nombre: "Alejandro Hernandez", 
+                    rol: "cajero", 
+                    destino: "dashboard_cajero.html" 
+                }
+            };
+
+            // Verificación lógica
+            if (usuarios[userInput] && usuarios[userInput].pass === passInput) {
+                // Guardamos info del usuario para usarla en los dashboards
+                sessionStorage.setItem('usuarioNombre', usuarios[userInput].nombre);
+                sessionStorage.setItem('usuarioRol', usuarios[userInput].rol);
+                
+                // Redirección según el rol configurado
+                window.location.href = usuarios[userInput].destino; 
+            } else {
+                alert("Acceso denegado. Verifica tu usuario y contraseña.");
+            }
+        });
+    </script>
+
+</body>
+</html>

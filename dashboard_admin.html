@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - ADMINISTRADOR</title>
+    <link rel="icon" type="image/x-icon" href="./logo_palma.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            vibrant: '#008f39', // Verde principal
+                            dark: '#1d4316',    // Verde oscuro para el hover
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        
+        .menu-card {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            background-color: white;
+            color: #008f39;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-8px);
+            background-color: #1d4316 !important;
+            color: white !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body class="bg-brand-vibrant h-screen w-screen overflow-hidden flex flex-col p-8 relative">
+
+    <div id="menuContainer" class="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full">
+    </div>
+
+    <div class="flex justify-between items-end w-full max-w-7xl mx-auto mt-auto pb-4">
+        
+        <div class="flex items-center gap-4 text-white">
+            <div id="userAvatar" class="w-16 h-16 bg-gray-200 rounded-full border-2 border-white/20"></div>
+            <div>
+                <h2 id="userName" class="text-2xl font-black leading-none tracking-tight">Cargando...</h2>
+                <p id="userRole" class="text-sm font-medium opacity-90 mt-1">Cargando...</p>
+            </div>
+        </div>
+
+        <div class="text-white text-right">
+            <h1 id="clock" class="text-6xl font-black tracking-tighter leading-none">00:00</h1>
+            <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide">Cargando fecha...</p>
+        </div>
+    </div>
+
+    <div class="absolute top-4 right-4 opacity-20 hover:opacity-100 transition-opacity">
+        <button onclick="renderMenu('admin')" class="bg-white text-xs p-2 rounded-l-md font-bold text-brand-vibrant">Ver Admin</button>
+        <button onclick="renderMenu('cajero')" class="bg-white text-xs p-2 rounded-r-md font-bold border-l text-brand-vibrant">Ver Cajero</button>
+    </div>
+
+    <script>
+        const menuContainer = document.getElementById('menuContainer');
+        const nombreFijo = sessionStorage.getItem('usuarioNombre') || "Nicolás Herrán";
+
+        const views = {
+            admin: {
+                role: "Administrador",
+                layout: "grid-cols-3",
+                items: [
+                    { label: "VENTAS", span: "" },
+                    { label: "INVENTARIOS", span: "" },
+                    { label: "CUENTA", span: "row-span-2" },
+                    { label: "FINANZAS", span: "" },
+                    { label: "PERSONAL", span: "" }
+                ]
+            },
+            cajero: {
+                role: "Cajero",
+                layout: "grid-cols-3",
+                items: [
+                    { label: "VENTAS", span: "col-span-3" },
+                    { label: "FINANZAS", span: "" },
+                    { label: "PERSONAL", span: "" },
+                    { label: "INVENTARIOS", span: "" }
+                ]
+            }
+        };
+
+        function renderMenu(roleKey) {
+            const config = views[roleKey];
+            
+            document.getElementById('userName').textContent = nombreFijo;
+            document.getElementById('userRole').textContent = config.role;
+            
+            menuContainer.innerHTML = `
+                <div class="grid ${config.layout} gap-6 w-full h-[70vh]">
+                    ${config.items.map(item => {
+                        // CONEXIÓN A CAJA: Si es ventas, agrega la redirección al hacer clic
+                        const action = item.label === 'VENTAS' ? "window.location.href='caja.html'" : "";
+                        
+                        return `
+                            <div onclick="${action}" class="menu-card ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
+                                <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hh}:${mm}`;
+
+            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            const fechaStr = `${dias[now.getDay()]} ${now.getDate()} ${meses[now.getMonth()]}, ${now.getFullYear()}`;
+            document.getElementById('dateLabel').textContent = fechaStr.toUpperCase();
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        renderMenu('admin');
+    </script>
+</body>
+</html>

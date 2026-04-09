@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PALMA - Login</title>
+    
+    <!-- FAVICON (Pestaña) -->
+    <link rel="icon" type="image/x-icon" href="./assets/logo_palma.ico">
+
+    <!-- CDN de Tailwind CSS traer Tailwind desde internet-->
+    <script src="https://cdn.tailwindcss.com"></script> 
+
+    <!-- Google Fonts: Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+
+    <script> <!-- Manual de identidad -->
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    colors: {
+                        'palma-verde-fondo': '#008F39', 
+                        'palma-verde-boton': '#1E833E', 
+                        'palma-verde-claro': '#DBEADA', 
+                        'palma-texto-input': '#A7C4A0', 
+                        'palma-titulo': '#6DB063',      
+                    },
+                    fontFamily: {
+                        'montserrat': ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-palma-verde-fondo h-screen flex justify-center items-center antialiased">
+
+    <!-- Tarjeta Principal Blanca -->
+    <div class="bg-white w-[460px] p-10 rounded-[35px] shadow-2xl flex flex-col items-center">
+        
+        <!-- Logo Palmera (Imagen .png insertada) -->
+        <div class="mb-2">
+            <!-- Se actualizó a .png para mayor nitidez -->
+            <img src="logo_palma.png" alt="Palmera" class="w-32 h-auto" onerror="this.src='https://cdn-icons-png.flaticon.com/512/346/346167.png'">
+        </div>
+
+        <!-- Título PALMA -->
+        <h1 class="text-palma-titulo text-5xl font-[900] mb-10 tracking-tighter">
+            PALMA
+        </h1>
+        
+        <form class="w-full">
+            <div class="space-y-4">
+                <!-- Campo Usuario -->
+                <input type="text" placeholder="Usuario" 
+                    class="w-full px-8 py-4 bg-palma-verde-claro border-none rounded-[18px] text-palma-texto-input placeholder:text-palma-texto-input text-lg outline-none font-bold focus:ring-2 focus:ring-palma-verde-boton/20 transition-all">
+                
+                <!-- Campo Contraseña -->
+                <input type="password" placeholder="Contraseña" 
+                    class="w-full px-8 py-4 bg-palma-verde-claro border-none rounded-[18px] text-palma-texto-input placeholder:text-palma-texto-input text-lg outline-none font-bold focus:ring-2 focus:ring-palma-verde-boton/20 transition-all">
+            </div>
+            
+            <!-- Contenedor Inferior -->
+            <div class="flex justify-between items-end mt-10">
+                
+                <!-- BOTÓN ENTRAR -->
+                <button type="submit" 
+                    class="bg-palma-verde-boton text-white font-[900] text-lg px-8 py-3 rounded-[15px] shadow-md hover:brightness-110 active:scale-95 transition-all uppercase tracking-tight">
+                    ENTRAR
+                </button>
+
+                <!-- Hipervínculos -->
+                <div class="flex flex-col items-end leading-[1.3]">
+                    <a href="#" class="text-palma-texto-input text-[13px] hover:underline decoration-1">¿Olvidaste el usuario?</a>
+                    <a href="#" class="text-palma-texto-input text-[13px] hover:underline decoration-1">¿Olvidaste la contraseña?</a>
+                    <a href="#" class="text-palma-texto-input text-[13px] font-bold hover:underline">Ayuda</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
