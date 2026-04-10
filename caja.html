@@ -35,6 +35,10 @@
     body { font-family: 'Montserrat', sans-serif; }
     .table-scroll::-webkit-scrollbar { width: 6px; }
     .table-scroll::-webkit-scrollbar-thumb { background: #b6dfc6; border-radius: 10px; }
+    
+    /* Animación para el modal */
+    .modal-active { display: flex !important; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 
@@ -132,14 +136,42 @@
 
   </div>
 
+  <div id="modalContainer" class="fixed inset-0 bg-black/40 backdrop-blur-[2px] hidden z-50 flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden border border-brand-border">
+          <div class="px-8 pt-8 flex justify-between items-center">
+              <h3 id="modalTitle" class="text-xl font-black text-brand uppercase tracking-tighter">Título</h3>
+              <button onclick="cerrarModal()" class="text-gray-300 hover:text-danger font-black text-xl">×</button>
+          </div>
+          <div id="modalBody" class="p-8"></div>
+          <div id="modalFooter" class="px-8 pb-8 flex justify-end gap-3"></div>
+      </div>
+  </div>
+
   <script>
     let productosVenta = [];
     let totalActual = 0;
 
-    // Generar ID de operación al cargar
+    // Al cargar la página
     window.onload = () => {
-        document.getElementById('opID').textContent = `#${Math.floor(Math.random()*9000)+1000}-2026`;
+        generarNuevoID();
+        renderTabla();
     };
+
+    function generarNuevoID() {
+        document.getElementById('opID').textContent = `#${Math.floor(Math.random()*9000)+1000}-2026`;
+    }
+
+    // Funciones del Sistema de Modales
+    function abrirModal(titulo, cuerpo, footer) {
+        document.getElementById('modalTitle').textContent = titulo;
+        document.getElementById('modalBody').innerHTML = cuerpo;
+        document.getElementById('modalFooter').innerHTML = footer;
+        document.getElementById('modalContainer').classList.add('modal-active');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalContainer').classList.remove('modal-active');
+    }
 
     function renderTabla() {
         const tbody = document.getElementById('tablaBody');
@@ -147,90 +179,165 @@
         totalActual = 0;
 
         if (productosVenta.length === 0) {
-            tbody.innerHTML = '<tr class="border-b border-gray-50"><td colspan="4" class="py-5 text-center text-gray-200 italic text-xs">... lista de productos en espera ...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-gray-200 italic text-xs uppercase tracking-widest">Esperando productos...</td></tr>';
         } else {
-            productosVenta.forEach((p, index) => {
+            productosVenta.forEach((p) => {
                 totalActual += p.precio * p.cantidad;
                 tbody.innerHTML += `
                     <tr class="border-b border-gray-50 hover:bg-brand-muted/40 transition-colors group cursor-pointer">
                         <td class="py-5 font-mono text-xs text-gray-400">${p.id}</td>
-                        <td class="py-5 font-bold text-gray-700">${p.nombre}</td>
+                        <td class="py-5 font-bold text-gray-700 uppercase text-xs">${p.nombre}</td>
                         <td class="py-5 text-center font-bold text-brand">${p.cantidad}</td>
                         <td class="py-5 text-right font-black text-gray-800">$${p.precio.toLocaleString()}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
         document.getElementById('displayTotal').textContent = `$${totalActual.toLocaleString()}`;
         actualizarCambio();
     }
 
+    // --- FUNCIONALIDAD: AGREGAR ---
     function agregarProducto() {
-        const nombre = prompt("Nombre del producto:");
-        const cantidad = parseFloat(prompt("Cantidad o Peso (ej: 2.5):"));
-        const precio = parseInt(prompt("Precio Unitario:"));
+        const cuerpo = `
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-brand uppercase tracking-widest">Nombre del Producto</label>
+                    <input type="text" id="addNombre" class="w-full p-3 bg-brand-muted rounded-xl font-bold text-brand outline-none mt-1">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-brand uppercase tracking-widest">Cant / Peso</label>
+                        <input type="number" id="addCant" class="w-full p-3 bg-brand-muted rounded-xl font-bold text-brand outline-none mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-brand uppercase tracking-widest">Precio Unitario</label>
+                        <input type="number" id="addPrecio" class="w-full p-3 bg-brand-muted rounded-xl font-bold text-brand outline-none mt-1">
+                    </div>
+                </div>
+            </div>`;
+        const footer = `
+            <button onclick="cerrarModal()" class="px-6 py-2 font-black text-gray-400 uppercase text-xs">Cancelar</button>
+            <button onclick="confirmarAgregar()" class="bg-brand text-white px-8 py-3 rounded-xl font-black uppercase text-xs">Añadir</button>`;
+        abrirModal("Nuevo Item", cuerpo, footer);
+    }
 
-        if (nombre && cantidad && precio) {
-            const nuevoProd = {
-                id: 1000 + productosVenta.length + 1,
-                nombre: nombre,
-                cantidad: cantidad,
-                precio: precio
-            };
-            productosVenta.push(nuevoProd);
+    function confirmarAgregar() {
+        const n = document.getElementById('addNombre').value;
+        const c = parseFloat(document.getElementById('addCant').value);
+        const p = parseInt(document.getElementById('addPrecio').value);
+        if (n && c && p) {
+            productosVenta.push({ id: 1000 + productosVenta.length + 1, nombre: n, cantidad: c, precio: p });
             renderTabla();
+            cerrarModal();
         }
     }
 
+    // --- FUNCIONALIDAD: ELIMINAR ---
     function eliminarProducto() {
-        const idBusqueda = prompt("Ingrese el ID del producto a eliminar:");
-        productosVenta = productosVenta.filter(p => p.id != idBusqueda);
-        renderTabla();
+        let items = productosVenta.map(p => `
+            <label class="flex items-center justify-between p-3 hover:bg-red-50 rounded-xl cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" value="${p.id}" class="accent-danger w-4 h-4">
+                    <span class="font-bold text-gray-600 text-xs uppercase">${p.nombre}</span>
+                </div>
+                <span class="text-[10px] font-black text-gray-300">ID: ${p.id}</span>
+            </label>`).join('');
+
+        const cuerpo = `<div class="space-y-1 max-h-60 overflow-y-auto">${items || '<p class="text-center text-gray-300 py-4 text-xs">LISTA VACÍA</p>'}</div>`;
+        const footer = `
+            <button onclick="cerrarModal()" class="px-6 py-2 font-black text-gray-400 uppercase text-xs">Cancelar</button>
+            <button onclick="confirmarEliminar()" class="bg-danger text-white px-8 py-3 rounded-xl font-black uppercase text-xs">Eliminar</button>`;
+        abrirModal("Quitar de Factura", cuerpo, footer);
     }
 
-    function modificarProducto() {
-        const idBusqueda = prompt("Ingrese el ID del producto a modificar:");
-        const prod = productosVenta.find(p => p.id == idBusqueda);
-        
-        if (prod) {
-            prod.nombre = prompt("Nuevo nombre:", prod.nombre) || prod.nombre;
-            prod.cantidad = parseFloat(prompt("Nueva cantidad:", prod.cantidad)) || prod.cantidad;
-            prod.precio = parseInt(prompt("Nuevo precio:", prod.precio)) || prod.precio;
+    function confirmarEliminar() {
+        const checks = document.querySelectorAll('#modalBody input[type="checkbox"]:checked');
+        if (checks.length > 0 && confirm("¿Eliminar seleccionados?")) {
+            const ids = Array.from(checks).map(c => parseInt(c.value));
+            productosVenta = productosVenta.filter(p => !ids.includes(p.id));
             renderTabla();
+        }
+        cerrarModal();
+    }
+
+    // --- FUNCIONALIDAD: MODIFICAR ---
+    function modificarProducto() {
+        const cuerpo = `
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-brand uppercase tracking-widest">Ingresa el ID del producto</label>
+                <input type="number" id="modID" oninput="buscarParaMod()" class="w-full p-4 bg-brand-muted rounded-xl font-black text-brand text-center text-xl outline-none border-2 border-transparent focus:border-brand">
+                <div id="modCampos" class="hidden space-y-4 pt-4 border-t border-gray-100 animate-pulse">
+                    <input type="text" id="modNombre" class="w-full p-3 bg-gray-50 rounded-xl font-bold" placeholder="Nombre">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="modCant" class="p-3 bg-gray-50 rounded-xl font-bold" placeholder="Cant">
+                        <input type="number" id="modPrecio" class="p-3 bg-gray-50 rounded-xl font-bold" placeholder="Precio">
+                    </div>
+                </div>
+            </div>`;
+        const footer = `<button onclick="confirmarModificar()" class="bg-brand text-white px-8 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Cambios</button>`;
+        abrirModal("Editar Item", cuerpo, footer);
+    }
+
+    function buscarParaMod() {
+        const id = document.getElementById('modID').value;
+        const p = productosVenta.find(x => x.id == id);
+        const div = document.getElementById('modCampos');
+        if (p) {
+            div.classList.remove('hidden', 'animate-pulse');
+            document.getElementById('modNombre').value = p.nombre;
+            document.getElementById('modCant').value = p.cantidad;
+            document.getElementById('modPrecio').value = p.precio;
         } else {
-            alert("Producto no encontrado.");
+            div.classList.add('hidden');
         }
     }
 
+    function confirmarModificar() {
+        const id = document.getElementById('modID').value;
+        const p = productosVenta.find(x => x.id == id);
+        if (p) {
+            p.nombre = document.getElementById('modNombre').value;
+            p.cantidad = parseFloat(document.getElementById('modCant').value);
+            p.precio = parseInt(document.getElementById('modPrecio').value);
+            renderTabla();
+            cerrarModal();
+        }
+    }
+
+    // --- FUNCIONALIDAD: BUSCAR ---
     function buscarProducto() {
-        const busqueda = prompt("Buscar producto por nombre:").toLowerCase();
-        const filas = document.querySelectorAll('#tablaBody tr');
-        
-        filas.forEach(fila => {
-            const nombre = fila.children[1]?.textContent.toLowerCase();
-            if (nombre) {
-                fila.style.display = nombre.includes(busqueda) ? "" : "none";
-            }
+        const cuerpo = `
+            <div class="space-y-4">
+                <input type="text" id="searchInp" oninput="filtrarVenta()" class="w-full p-4 bg-brand-muted rounded-2xl font-bold text-brand outline-none" placeholder="Escribe el nombre aquí...">
+                <p class="text-center text-[10px] font-black text-brand/30 uppercase">La tabla se filtrará automáticamente</p>
+            </div>`;
+        const footer = `<button onclick="cerrarModal()" class="px-8 py-3 bg-brand text-white rounded-xl font-black uppercase text-xs w-full">Hecho</button>`;
+        abrirModal("Buscador de Venta", cuerpo, footer);
+    }
+
+    function filtrarVenta() {
+        const val = document.getElementById('searchInp').value.toLowerCase();
+        document.querySelectorAll('#tablaBody tr').forEach(tr => {
+            tr.style.display = tr.textContent.toLowerCase().includes(val) ? "" : "none";
         });
     }
 
+    // --- LÓGICA DE COBRO ---
     function actualizarCambio() {
-        const efectivo = parseInt(document.getElementById('inputEfectivo').value) || 0;
-        const cambio = efectivo - totalActual;
-        document.getElementById('displayCambio').textContent = `$${cambio > 0 ? cambio.toLocaleString() : 0}`;
+        const ef = parseInt(document.getElementById('inputEfectivo').value) || 0;
+        const cam = ef - totalActual;
+        document.getElementById('displayCambio').textContent = `$${cam > 0 ? cam.toLocaleString() : 0}`;
     }
 
     function cobrar() {
-        const efectivo = parseInt(document.getElementById('inputEfectivo').value) || 0;
-        if (totalActual === 0) return alert("No hay productos en la venta.");
-        if (efectivo < totalActual) return alert("Efectivo insuficiente.");
+        const ef = parseInt(document.getElementById('inputEfectivo').value) || 0;
+        if (totalActual === 0) return alert("No hay productos.");
+        if (ef < totalActual) return alert("Efectivo insuficiente.");
 
-        alert(`VENTA EXITOSA\nTotal: $${totalActual.toLocaleString()}\nCambio: $${(efectivo - totalActual).toLocaleString()}`);
-        
-        // Limpiar para nueva venta
+        alert(`COBRO EXITOSO\nTotal: $${totalActual.toLocaleString()}\nCambio: $${(ef - totalActual).toLocaleString()}`);
         productosVenta = [];
         document.getElementById('inputEfectivo').value = '';
-        document.getElementById('opID').textContent = `#${Math.floor(Math.random()*9000)+1000}-2026`;
+        generarNuevoID();
         renderTabla();
     }
   </script>
