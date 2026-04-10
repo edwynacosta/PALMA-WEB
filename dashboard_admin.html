@@ -67,7 +67,7 @@
         </div>
 
         <div class="text-white text-right">
-            <h1 id="clock" class="text-6xl font-black tracking-tighter leading-none">00:00</h1>
+            <h1 id="clock" class="text-6xl font-semibold tracking-tighter leading-none">00:00</h1>
             <p id="dateLabel" class="text-sm font-bold mt-2 uppercase tracking-wide">Cargando fecha...</p>
         </div>
     </div>
@@ -106,26 +106,33 @@
         };
 
         function renderMenu(roleKey) {
-            const config = views[roleKey];
-            
-            document.getElementById('userName').textContent = nombreFijo;
-            document.getElementById('userRole').textContent = config.role;
-            
-            menuContainer.innerHTML = `
-                <div class="grid ${config.layout} gap-6 w-full h-[70vh]">
-                    ${config.items.map(item => {
-                        // CONEXIÓN A CAJA: Si es ventas, agrega la redirección al hacer clic
-                        const action = item.label === 'VENTAS' ? "window.location.href='caja.html'" : "";
-                        
-                        return `
-                            <div onclick="${action}" class="menu-card ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
-                                <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-        }
+    const config = views[roleKey];
+    
+    document.getElementById('userName').textContent = nombreFijo;
+    document.getElementById('userRole').textContent = config.role;
+    
+    menuContainer.innerHTML = `
+        <div class="grid ${config.layout} gap-6 w-full h-[70vh]">
+            ${config.items.map(item => {
+                
+                // --- INICIO DE LA UNIÓN DE MÓDULOS ---
+                let action = "";
+                if (item.label === 'VENTAS') {
+                    action = "window.location.href='caja.html'";
+                } else if (item.label === 'CUENTA') {
+                    action = "window.location.href='cuenta.html'";
+                }
+                // --- FIN DE LA UNIÓN ---
+
+                return `
+                    <div onclick="${action}" class="menu-card ${item.span} rounded-[40px] flex items-center justify-center shadow-2xl">
+                        <span class="text-2xl font-black tracking-widest uppercase">${item.label}</span>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
 
         function updateDateTime() {
             const now = new Date();
