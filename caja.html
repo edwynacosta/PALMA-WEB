@@ -36,7 +36,6 @@
     .table-scroll::-webkit-scrollbar { width: 6px; }
     .table-scroll::-webkit-scrollbar-thumb { background: #b6dfc6; border-radius: 10px; }
     
-    /* Animación para el modal */
     .modal-active { display: flex !important; animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
@@ -46,7 +45,7 @@
 
   <div class="bg-white rounded-2xl shadow-xl w-full h-full flex flex-col overflow-hidden border border-brand-border">
 
-    <div class="flex items-center justify-between border-b border-gray-100 bg-white">
+    <div class="flex items-center justify-between border-b border-gray-100 bg-white pr-6">
       <div class="flex overflow-x-auto">
         <button class="px-8 py-5 text-[11px] font-black uppercase text-brand border-b-4 border-brand tracking-widest transition-all">
             Caja
@@ -62,15 +61,30 @@
         </button>
       </div>
       
-      <button onclick="window.history.back()" class="mr-6 w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-brand font-black hover:bg-red-50 hover:text-danger hover:border-red-200 transition-all active:scale-90">
-        X
-      </button>
+      <div class="flex items-center gap-5">
+        <div class="flex items-center gap-3 text-right">
+            <div>
+                <h2 id="cajaUserName" class="text-[11px] font-black text-brand leading-none">Cargando...</h2>
+                <p class="text-[9px] font-bold text-gray-400 uppercase mt-1">Cajero</p>
+            </div>
+            <div class="w-10 h-10 bg-brand-muted rounded-full border border-brand-border flex items-center justify-center overflow-hidden">
+                <img id="userPhoto" src="" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <button onclick="cerrarSesion()" class="px-4 py-2 bg-white text-red-600 rounded-[10px] text-[10px] font-bold shadow-sm border border-red-50 hover:bg-red-600 hover:text-white transition-all active:scale-95">
+            Cerrar sesión
+        </button>
+
+        <button onclick="window.history.back()" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-brand font-black hover:bg-red-50 hover:text-danger hover:border-red-200 transition-all active:scale-90">
+            X
+        </button>
+      </div>
     </div>
 
     <div class="flex-1 flex overflow-hidden">
       
       <div class="w-80 bg-gray-50/50 border-r border-gray-100 p-6 flex flex-col gap-5">
-        
         <div class="bg-brand text-white p-7 rounded-[25px] shadow-lg">
           <p class="text-[10px] font-black uppercase opacity-80 mb-1 tracking-wider">Total a pagar:</p>
           <h2 id="displayTotal" class="text-5xl font-black tracking-tighter">$0</h2>
@@ -88,12 +102,8 @@
       </div>
 
       <div class="flex-1 flex flex-col p-8 overflow-hidden">
-        <div class="flex justify-between items-center mb-8">
+        <div class="mb-8">
             <h1 class="text-4xl font-black text-brand uppercase tracking-tighter">Facturación</h1>
-            <div class="text-right">
-                <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest">ID Operación</p>
-                <p id="opID" class="font-bold text-gray-500">#0000-2026</p>
-            </div>
         </div>
 
         <div class="flex-1 overflow-y-auto table-scroll pr-2">
@@ -107,7 +117,7 @@
                 </tr>
               </thead>
               <tbody id="tablaBody" class="text-gray-600">
-                </tbody>
+              </tbody>
             </table>
         </div>
       </div>
@@ -151,14 +161,20 @@
     let productosVenta = [];
     let totalActual = 0;
 
-    // Al cargar la página
     window.onload = () => {
-        generarNuevoID();
+        // Cargar Datos del Usuario
+        const nombreGuardado = sessionStorage.getItem('usuarioNombre') || "Edwin Acosta";
+        document.getElementById('cajaUserName').textContent = nombreGuardado;
+        document.getElementById('userPhoto').src = `https://ui-avatars.com/api/?name=${nombreGuardado}&background=e8f5ee&color=1a7c3e&bold=true`;
+        
         renderTabla();
     };
 
-    function generarNuevoID() {
-        document.getElementById('opID').textContent = `#${Math.floor(Math.random()*9000)+1000}-2026`;
+    function cerrarSesion() {
+        if(confirm("¿Estás seguro de que deseas cerrar la sesión?")) {
+            sessionStorage.clear();
+            window.location.href = 'login.html'; 
+        }
     }
 
     // Funciones del Sistema de Modales
@@ -196,7 +212,6 @@
         actualizarCambio();
     }
 
-    // --- FUNCIONALIDAD: AGREGAR ---
     function agregarProducto() {
         const cuerpo = `
             <div class="space-y-4">
@@ -232,7 +247,6 @@
         }
     }
 
-    // --- FUNCIONALIDAD: ELIMINAR ---
     function eliminarProducto() {
         let items = productosVenta.map(p => `
             <label class="flex items-center justify-between p-3 hover:bg-red-50 rounded-xl cursor-pointer">
@@ -260,7 +274,6 @@
         cerrarModal();
     }
 
-    // --- FUNCIONALIDAD: MODIFICAR ---
     function modificarProducto() {
         const cuerpo = `
             <div class="space-y-4">
@@ -304,7 +317,6 @@
         }
     }
 
-    // --- FUNCIONALIDAD: BUSCAR ---
     function buscarProducto() {
         const cuerpo = `
             <div class="space-y-4">
@@ -322,7 +334,6 @@
         });
     }
 
-    // --- LÓGICA DE COBRO ---
     function actualizarCambio() {
         const ef = parseInt(document.getElementById('inputEfectivo').value) || 0;
         const cam = ef - totalActual;
@@ -337,7 +348,6 @@
         alert(`COBRO EXITOSO\nTotal: $${totalActual.toLocaleString()}\nCambio: $${(ef - totalActual).toLocaleString()}`);
         productosVenta = [];
         document.getElementById('inputEfectivo').value = '';
-        generarNuevoID();
         renderTabla();
     }
   </script>

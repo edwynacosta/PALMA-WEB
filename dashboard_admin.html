@@ -72,9 +72,18 @@
         </div>
     </div>
 
-    <div class="absolute top-4 right-4 opacity-20 hover:opacity-100 transition-opacity">
-        <button onclick="renderMenu('admin')" class="bg-white text-xs p-2 rounded-l-md font-bold text-brand-vibrant">Ver Admin</button>
-        <button onclick="renderMenu('cajero')" class="bg-white text-xs p-2 rounded-r-md font-bold border-l text-brand-vibrant">Ver Cajero</button>
+    <div class="absolute top-8 right-8 flex gap-3 z-10">
+        <button onclick="renderMenu('admin')" class="px-5 py-2 bg-white text-brand-vibrant rounded-[10px] text-[10px] font-bold hover:bg-[#1a3c1a] hover:text-white transition-all active:scale-95 shadow-sm">
+            Ver Admin
+        </button>
+        
+        <button onclick="renderMenu('cajero')" class="px-5 py-2 bg-white text-brand-vibrant rounded-[10px] text-[10px] font-bold hover:bg-[#1a3c1a] hover:text-white transition-all active:scale-95 shadow-sm">
+            Ver Cajero
+        </button>
+        
+        <button onclick="cerrarSesion()" class="px-5 py-2 bg-white text-red-600 rounded-[10px] text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm">
+            Cerrar Sesión
+        </button>
     </div>
 
     <script>
@@ -151,6 +160,13 @@
         updateDateTime();
 
         renderMenu('admin');
+
+    function cerrarSesion() {
+    if(confirm("¿Estás seguro de que deseas salir del sistema Palma?")) {
+        sessionStorage.clear(); // Limpia los datos de sesión por seguridad
+        window.location.href = 'login.html'; // Redirige a la pantalla de login (ajusta el nombre si es necesario)
+    }
+}
     </script>
 </body>
 </html>
